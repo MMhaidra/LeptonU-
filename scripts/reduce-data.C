@@ -1,5 +1,11 @@
-// this is a little script to reduce the data for MVA input
-// and count the luminosity just because we can 
+
+
+
+// What do we do : this is a little script to reduce the data for MVA input
+// and count the luminosity just because we can. 
+
+
+
 #include "TFile.h"
 #include "TCut.h"
 #include "TTree.h"
