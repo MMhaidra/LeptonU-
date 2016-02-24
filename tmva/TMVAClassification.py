@@ -1,36 +1,5 @@
 #!/usr/bin/env python
-# @(#)root/tmva $Id$
-# ------------------------------------------------------------------------------ #
-# Project      : TMVA - a Root-integrated toolkit for multivariate data analysis #
-# Package      : TMVA                                                            #
-# Python script: TMVAClassification.py                                           #
-#                                                                                #
-# This python script provides examples for the training and testing of all the   #
-# TMVA classifiers through PyROOT.                                               #
-#                                                                                #
-# The Application works similarly, please see:                                   #
-#    TMVA/macros/TMVAClassificationApplication.C                                 #
-# For regression, see:                                                           #
-#    TMVA/macros/TMVARegression.C                                                #
-#    TMVA/macros/TMVARegressionpplication.C                                      #
-# and translate to python as done here.                                          #
-#                                                                                #
-# As input data is used a toy-MC sample consisting of four Gaussian-distributed  #
-# and linearly correlated input variables.                                       #
-#                                                                                #
-# The methods to be used can be switched on and off via the prompt command, for  #
-# example:                                                                       #
-#                                                                                #
-#    python TMVAClassification.py --methods Fisher,Likelihood                    #
-#                                                                                #
-# The output file "TMVA.root" can be analysed with the use of dedicated          #
-# macros (simply say: root -l <../macros/macro.C>), which can be conveniently    #
-# invoked through a GUI that will appear at the end of the run of this macro.    #
-#                                                                                #
-# for help type "python TMVAClassification.py --help"                            #
-# ------------------------------------------------------------------------------ #
-
-# --------------------------------------------
+# @(#)root/tmva $Id$#
 # Standard python import
 import sys    # exit
 import time   # time accounting
@@ -40,20 +9,27 @@ import getopt # command line parser
 
 # Default settings for command line arguments
 DEFAULT_OUTFNAME = "TMVA.root"
-DEFAULT_INFNAME  = "tmva_class_example.root"
-DEFAULT_TREESIG  = "TreeS"
-DEFAULT_TREEBKG  = "TreeB"
-DEFAULT_METHODS  = "Cuts,CutsD,CutsPCA,CutsGA,CutsSA,Likelihood,LikelihoodD,LikelihoodPCA,LikelihoodKDE,LikelihoodMIX,PDERS,PDERSD,PDERSPCA,PDEFoam,PDEFoamBoost,KNN,LD,Fisher,FisherG,BoostedFisher,HMatrix,FDA_GA,FDA_SA,FDA_MC,FDA_MT,FDA_GAMT,FDA_MCMT,MLP,MLPBFGS,MLPBNN,CFMlpANN,TMlpANN,SVM,BDT,BDTD,BDTG,BDTB,RuleFit"
+#DEFAULT_INFNAMEBKG  = "/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-uppersideband.root"
+DEFAULT_INFNAMEBKG  = "/exp/LHCb/amhis/LeptonU-/tuples/data/LeptonU-total-electrons-23022016.root"
+DEFAULT_INFNAMESIG  = "/exp/LHCb/amhis/LeptonU-/tuples/montecarlo/spring16/mc-15124011-leptonU.root"
+DEFAULT_TREESIG  = "Tuple_Bu2LLK_eeLine2/DecayTree"
+#DEFAULT_TREEBKG  = "DecayTree"
+DEFAULT_TREEBKG  = "TupleFromData_Bu2LLK_eeLine2/DecayTree"
+ 
+DEFAULT_METHODS  =  "BDTG"#,Cuts,CuBtsD,CutsPCA,CutsGA,CutsSA,Likelihood,LikelihoodD,LikelihoodPCA,LikelihoodKDE,LikelihoodMIX,PDERS,PDERSD,PDERSPCA,PDEFoam,PDEFoamBoost,KNN,LD,Fisher,FisherG,BoostedFisher,HMatrix,FDA_GA,FDA_SA,FDA_MC,FDA_MT,FDA_GAMT,FDA_MCMT,MLP,MLPBFGS,MLPBNN,CFMlpANN,TMlpANN,SVM,BDT,BDTD,BDTG,BDTB,RuleFit"
 
 # Print usage help
 def usage():
     print " "
     print "Usage: python %s [options]" % sys.argv[0]
     print "  -m | --methods    : gives methods to be run (default: all methods)"
-    print "  -i | --inputfile  : name of input ROOT file (default: '%s')" % DEFAULT_INFNAME
+    print "  -is | --inputfile signal  : name of input ROOT file (default: '%s')" %  DEFAULT_INFNAMESIG
+    print "  -ib | --inputfile background : name of input ROOT file (default: '%s')" % DEFAULT_INFNAMEBKG
+ 
     print "  -o | --outputfile : name of output ROOT file containing results (default: '%s')" % DEFAULT_OUTFNAME
-    print "  -t | --inputtrees : input ROOT Trees for signal and background (default: '%s %s')" \
-          % (DEFAULT_TREESIG, DEFAULT_TREEBKG)
+    print "  -t | --inputtrees signal : input ROOT Trees for signal and background (default: '%s %s')" % DEFAULT_TREESIG
+   
+    print "  -t | --inputtrees : input ROOT Trees for signal and background (default: '%s %s')" % DEFAULT_TREEBKG
     print "  -v | --verbose"
     print "  -? | --usage      : print this help message"
     print "  -h | --help       : print this help message"
@@ -64,8 +40,8 @@ def main():
 
     try:
         # retrive command line options
-        shortopts  = "m:i:t:o:vh?"
-        longopts   = ["methods=", "inputfile=", "inputtrees=", "outputfile=", "verbose", "help", "usage"]
+        shortopts  = "m:is:ib:ts:tb:o:vh?"
+        longopts   = ["methods=", "inputfile_signal=","inputfile_background=" , "inputtree_signal=", "inputtree_background=",  "outputfile=", "verbose", "help", "usage"]
         opts, args = getopt.getopt( sys.argv[1:], shortopts, longopts )
 
     except getopt.GetoptError:
@@ -74,7 +50,8 @@ def main():
         usage()
         sys.exit(1)
 
-    infname     = DEFAULT_INFNAME
+    infnameSig     = DEFAULT_INFNAMESIG
+    infnameBkg     = DEFAULT_INFNAMEBKG
     treeNameSig = DEFAULT_TREESIG
     treeNameBkg = DEFAULT_TREEBKG
     outfname    = DEFAULT_OUTFNAME
@@ -86,21 +63,16 @@ def main():
             sys.exit(0)
         elif o in ("-m", "--methods"):
             methods = a
-        elif o in ("-i", "--inputfile"):
-            infname = a
+        elif o in ("-is", "--inputfile_signal"):
+            infnameSig = a
+        elif o in ("-ib", "--inputfile_background"):
+            infnameBkg = a
         elif o in ("-o", "--outputfile"):
             outfname = a
-        elif o in ("-t", "--inputtrees"):
-            a.strip()
-            trees = a.rsplit( ' ' )
-            trees.sort()
-            trees.reverse()
-            if len(trees)-trees.count('') != 2:
-                print "ERROR: need to give two trees (each one for signal and background)"
-                print trees
-                sys.exit(1)
-            treeNameSig = trees[0]
-            treeNameBkg = trees[1]
+        elif o in ("-ts", "--inputree_signal"):
+            treeNameSig = a 
+        elif o in ("-tb", "--inputtree_background"):
+            treeNameBkg = a
         elif o in ("-v", "--verbose"):
             verbose = True
 
@@ -150,31 +122,83 @@ def main():
     # Define the input variables that shall be used for the classifier training
     # note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
     # [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
-    factory.AddVariable( "myvar1 := var1+var2", 'F' )
-    factory.AddVariable( "myvar2 := var1-var2", "Expression 2", "", 'F' )
-    factory.AddVariable( "var3",                "Variable 3", "units", 'F' )
-    factory.AddVariable( "var4",                "Variable 4", "units", 'F' )
+    #factory.AddVariable( "myvar1 := var1+var2", 'F' )
+    #factory.AddVariable( "myvar2 := var1-var2", "Expression 2", "", 'F' )
+    #factory.AddVariable( "var3",                "Variable 3", "units", 'F' )
+    #factory.AddVariable( "var4",                "Variable 4", "units", 'F' )
+    #factory.AddVariable ("Polarity", "", "" , 'F')
+    #factory.AddVariable ("GpsTime", "", "" , 'F')
 
-    # You can add so-called "Spectator variables", which are not used in the MVA training, 
+    #Lb variables
+    factory.AddVariable( "Lambdab_PT", "Lambdab_PT", "" , 'F' )
+    factory.AddVariable( "Lambdab_DIRA_OWNPV",                "Lambdab_DIRAOWNPV", "", 'F' )
+    factory.AddVariable( "Lambdab_FDCHI2_OWNPV",                "Lambdab_FDCHI2_OWNPV", "", 'F' )
+    factory.AddVariable( "Lambdab_LOKI_DTF_CHI2NDOF",                "Lambdab_LOKI_DTF_CHI2NDOF", "", 'F' )
+    factory.AddVariable( "Lambdab_ENDVERTEX_CHI2",                "Lambdab_ENDVERTEX_CHI2", "", 'F' )
+
+
+
+
+    factory.AddVariable( "Jpsi_PT",   "Jpsi_PT", "" , 'F' )
+    factory.AddVariable( "Jpsi_DIRA_OWNPV",                "Jpsi_DIRAOWNPV", "", 'F' )
+    factory.AddVariable( "Jpsi_FDCHI2_OWNPV",                "Jpsi_FDCHI2_OWNPV", "", 'F' )
+    factory.AddVariable( "Jpsi_LOKI_DTF_CHI2NDOF",                "Jpsi_LOKI_DTF_CHI2NDOF", "", 'F' )
+    factory.AddVariable( "Jpsi_ENDVERTEX_CHI2",                "Jpsi_ENDVERTEX_CHI2", "", 'F' )
+
+    
+    factory.AddVariable( "Lambdastar_PT",   "Lambdastar", "" ,  'F' )
+    factory.AddVariable( "Lambdastar_DIRA_OWNPV",                "Lambdastar_DIRAOWNPV", "", 'F' )
+    factory.AddVariable( "Lambdastar_FDCHI2_OWNPV",                "Lambdastar_FDCHI2_OWNPV", "", 'F' )
+    factory.AddVariable( "Lambdastar_LOKI_DTF_CHI2NDOF",                "Lambdastar_LOKI_DTF_CHI2NDOF", "", 'F' )
+    factory.AddVariable( "Lambdastar_ENDVERTEX_CHI2",                "Lambdastar_ENDVERTEX_CHI2", "", 'F' )
+        
+
+
+
+
+
+    factory.AddVariable( "minHadron_PT:=min(Kaon_PT, Proton_PT)  ",   "minHadron_PT", "" , 'F' )
+    factory.AddVariable( "maxHadron_PT:=max(Kaon_PT, Proton_PT)  ",   "maxHadron_PT", "" , 'F' )
+    factory.AddVariable( "minHadron_IPCHI2:=min(Kaon_IPCHI2_OWNPV, Proton_IPCHI2_OWNPV)  ",   "minHadron_PTCHI2", "" , 'F' )
+    factory.AddVariable( "maxHadron_IPCHI2:=max(Kaon_IPCHI2_OWNPV, Proton_IPCHI2_OWNPV)  ",   "maxHadron_IPCHI2", "" , 'F' )
+
+
+
+     # You can add so-called "Spectator variables", which are not used in the MVA training, 
     # but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the 
     # input variables, the response values of all trained MVAs, and the spectator variables
-    factory.AddSpectator( "spec1:=var1*2",  "Spectator 1", "units", 'F' )
-    factory.AddSpectator( "spec2:=var1*3",  "Spectator 2", "units", 'F' )
+#    factory.AddSpectator( "spec1:=var1*2",  "Spectator 1", "units", 'F' )
+#    factory.AddSpectator( "spec2:=var1*3",  "Spectator 2", "units", 'F' )
 
     # Read input data
-    if gSystem.AccessPathName( infname ) != 0: gSystem.Exec( "wget http://root.cern.ch/files/" + infname )
+    #if gSystem.AccessPathName( infname ) != 0: gSystem.Exec( "wget http://root.cern.ch/files/" + infname )
         
-    input = TFile.Open( infname )
+    #input = TFile.Open( infname )
+    input_signal = TFile.Open( infnameSig )
+    input_background = TFile.Open( infnameBkg )
 
     # Get the signal and background trees for training
-    signal      = input.Get( treeNameSig )
-    background  = input.Get( treeNameBkg )
-    
+    signal      = input_signal.Get( treeNameSig )
+    background  = input_background.Get( treeNameBkg )
+   
+
+
+    #for hell in signal : 
+        #print signal.Lambdab_ETA 
+
+
+ 
     # Global event weights (see below for setting event-wise weights)
     signalWeight     = 1.0
     backgroundWeight = 1.0
 
-    # ====== register trees ====================================================
+    print 'is this modern hell ? '
+
+    print input_signal 
+    print input_background
+    print signal 
+    print background 
+  # ====== register trees ====================================================
     #
     # the following method is the prefered one:
     # you can add an arbitrary number of signal or background trees
@@ -201,19 +225,19 @@ def main():
     # Set individual event weights (the variables must exist in the original TTree)
     #    for signal    : factory.SetSignalWeightExpression    ("weight1*weight2");
     #    for background: factory.SetBackgroundWeightExpression("weight1*weight2");
-    factory.SetBackgroundWeightExpression( "weight" )
+   # factory.SetBackgroundWeightExpression( "weight" )
 
     # Apply additional cuts on the signal and background sample. 
     # example for cut: mycut = TCut( "abs(var1)<0.5 && abs(var2-0.5)<1" )
-    mycutSig = TCut( "" ) 
-    mycutBkg = TCut( "" ) 
+    mycutSig = TCut( "" ) #signal MC 
+    mycutBkg = TCut( "Lambdab_MM > 5700" ) #upper sideband
     
     # Here, the relevant variables are copied over in new, slim trees that are
     # used for TMVA training and testing
     # "SplitMode=Random" means that the input events are randomly shuffled before
     # splitting them into training and test samples
     factory.PrepareTrainingAndTestTree( mycutSig, mycutBkg,
-                                        "nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" )
+                                        "nTrain_Signal=1000:nTrain_Background=1000:SplitMode=Random:NormMode=NumEvents:!V" )
 
     # --------------------------------------------------------------------------------------------------
 
