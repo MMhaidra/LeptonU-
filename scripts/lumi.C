@@ -6,7 +6,7 @@
 void tellMeTheLumi (){
 
 
-  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/LeptonU-total-electrons-11122015.root");
+  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/LeptonU-electrons-30032016.root");
   TTree* lumi =  (TTree*)f->Get("GetIntegratedLuminosity/LumiTuple");
   double IntegratedLuminosity = 0;
   lumi->SetBranchAddress("IntegratedLuminosity", &IntegratedLuminosity);
@@ -16,7 +16,7 @@ void tellMeTheLumi (){
     total = total + IntegratedLuminosity;
   }
   cout << "-----------------" << endl;
-  cout << "Total luminosity " << total/100. << " fb-1 "<<  endl;
+  cout << "Total luminosity " << total << " pb-1 "<<  endl;
   cout << "-----------------" << endl;
   
   return;

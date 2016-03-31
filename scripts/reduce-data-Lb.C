@@ -8,10 +8,11 @@
 // and count the luminosity just because we can. 
 
 void FirstReduction(){
-  bool Jpsi = true; 
-  bool Photon = false;
+  bool Jpsi = false; 
+  bool Photon = true;
   bool Penguin = false;
-  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/LeptonU-total-electrons-23022016.root");
+  //  TString inputfile = ""
+  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/LeptonU-data-electrons-24032016.root");
   TTree * tree = (TTree*)f->Get("TupleFromData_Bu2LLK_eeLine2/DecayTree");
   
   cout << "Total number of entries : "  << tree->GetEntries () << endl;
@@ -60,7 +61,7 @@ void FirstReduction(){
   //Apply this to see something around the J/psi
   // root [10] tree->Draw("B_M0123_Subst3_pi2p", "Pion_ProbNNp>0.4&& Kaon_ProbNNk >0.4 && B_VtxChi2_0123 < 9 && B_IPChi2_0123<9")
   cout <<"For now we use the following cuts : " << ApplyThis << endl;
-  TFile * signal_file = new TFile("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-23022016.root", "recreate");
+  TFile * signal_file = new TFile("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-24032016.root", "recreate");
   // TFile * signal_file = new TFile("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-uppersideband.root", "recreate");
   
   
@@ -73,13 +74,15 @@ void FirstReduction(){
 
 void SecondReduction(){
     
-  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-23022016.root");
+  TFile * f = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-photon-24032016.root");
   TTree * tree = (TTree*)f->Get("DecayTree");
   
-
-  TCut TighterCuts = "Pion_ProbNNp>0.4&& Kaon_ProbNNk >0.4 && B_VtxChi2_0123 < 9 && B_IPChi2_0123<9";
+  cout << "There are  " << tree->GetEntries()   << " entries in the tree after the first reduction " << endl;
+  //  TCut TighterCuts = "Pion_ProbNNp>0.4&& Kaon_ProbNNk >0.4 && B_VtxChi2_0123 < 9 && B_IPChi2_0123<9";
+  TCut TighterCuts = "Proton_ProbNNp>0.1&& Kaon_ProbNNk >0.1 && Lambdab_ENDVERTEX_CHI2< 9 && Lambdab_LOKI_DTF_CHI2NDOF < 9 ";
   
-  TFile * Tighterfile = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-jpsi-tight-23022016.root", "recreate"); 
+  TFile * Tighterfile = new TFile ("/exp/LHCb/amhis/LeptonU-/tuples/data/forfit/real-data-electrons-photon-tight-24032016.root", "recreate"); 
+  //  TCut TighterCuts = "Pion_ProbNNp>0.4&& Kaon_ProbNNk >0.4 && B_VtxChi2_0123 < 9 && B_IPChi2_0123<9";
   TTree * Tightertree = tree->CopyTree(TighterCuts);
 
 
