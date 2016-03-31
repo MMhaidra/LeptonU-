@@ -1,0 +1,28 @@
+
+/////////////////////////////
+In the MonteCarlo Folder : 
+/////////////////////////////
+MC eepK PHSP
+- leptonU-electrons-26june.root
+- leptonU-electrons-26june.root
+
+MC eepK PHSP + "selection" 
+
+selection : "Lambda_b0_BKGCAT==10 && (J_psi_1S_MM > 2800.0) && (J_psi_1S_MM < 3400.0) && abs(Lambda_1520_0_MM - 1520.0)<150.0 
+&& Kminus_ProbNNk > 0.4 && pplus_ProbNNp>0.4&&eplus_PIDe>1.2&&eminus_PIDe>1.2";
+
+- signal_MC-MH-september7.root
+
+
+////////////////////////
+In the data Folder
+///////////////////////
+Data 300 pb-1
+- LeptonU-data-electrons-30July.root
+
+Data 939 pb-1 2012 
+- LeptonU-total-electrons-23022016.root
+
+
+Data 490 pb-1 2012 
+- LeptonU-total-electrons-24032016.root 
