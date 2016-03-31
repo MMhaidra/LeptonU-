@@ -14,6 +14,18 @@ selection : "Lambda_b0_BKGCAT==10 && (J_psi_1S_MM > 2800.0) && (J_psi_1S_MM < 34
 - signal_MC-MH-september7.root
 
 
+
+
+MC samples //exp/LHCb/amhis/LeptonU-/tuples/montecarlo/spring16/mars 
+
+mc-15124001.root Lb--> Lstar(1520) e e 
+
+mc-15124011.root Lb --> p K e e 
+
+mc-15154001.root Lb --> J/psi(ee) p K
+
+mc-15102201.root Lb--> gamma Lstar(1520)  
+
 ////////////////////////
 In the data Folder
 ///////////////////////
@@ -23,6 +35,5 @@ Data 300 pb-1
 Data 939 pb-1 2012 
 - LeptonU-total-electrons-23022016.root
 
-
-Data 490 pb-1 2012 
-- LeptonU-total-electrons-24032016.root 
+Data  994.459 pb-1 2012 
+- LeptonU-electrons-30032016.root
